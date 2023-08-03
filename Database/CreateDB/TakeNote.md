@@ -1,0 +1,5 @@
+- Tên collection nên được đặt theo dạng số nhiều, kiểu snake_case, ví dụ: 'users', 'refresh_tokens'
+- tên field nên được đặt theo dạng snake_case, ví dụ 'email_verify_token','fogort_password_token',..
+- '_id' là trường được MongoDB tự động tạo ra.
+- Trường 'created_at', 'updated_at' nên có kiểu 'Date' để dễ dàng sắp xếp, tìm kiếm, lọc theo thời gian
+- Tất cả các trường đại diện id của document thì nên có kiểu 'ObjectId'
