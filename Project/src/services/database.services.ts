@@ -6,6 +6,7 @@ const password = process.env.DB_PASSWORD
 const username = process.env.DB_USERNAME
 const dbName = process.env.DB_NAME
 const userCollection = process.env.DB_USERCOLLECTION
+const emailCollection = process.env.DB_EMAILCOLLECTION
 
 const uri = `mongodb+srv://${username}:${password}@twitter.76xkcay.mongodb.net/?retryWrites=true&w=majority`
 
@@ -35,7 +36,7 @@ class DatabaseService {
     // sử dụng generic //đặt kiểu dữ liệu trả về của hàm là Collection<User>
     return this.db.collection(`${userCollection}`)
     // hàm này trả về collection Users giúp tương tác với collection trong db
-  }
+  } 
   // từ khóa get giúp cho việt gọi tới hàm users không cần có dấu ()
   // mà chỉ cần gọi tới như một thuộc tính
   // nếu không có get thì sẽ gọi tới giống như một phương thức
