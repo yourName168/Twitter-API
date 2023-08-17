@@ -11,6 +11,7 @@ app.use(express.json())
 //Biến đổi json gửi lên thành object
 app.use('/user', usersRouter)
 // sử dụng router
+
 databaseService.connect()
 //khi gọi tới run() thì hàm sẽ trả về một promise và sẽ chạy các khối
-// có trong hàm run()
+// có trong hàm run
