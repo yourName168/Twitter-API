@@ -36,7 +36,7 @@ class DatabaseService {
     // sử dụng generic //đặt kiểu dữ liệu trả về của hàm là Collection<User>
     return this.db.collection(`${userCollection}`)
     // hàm này trả về collection Users giúp tương tác với collection trong db
-  } 
+  }
   // từ khóa get giúp cho việt gọi tới hàm users không cần có dấu ()
   // mà chỉ cần gọi tới như một thuộc tính
   // nếu không có get thì sẽ gọi tới giống như một phương thức
