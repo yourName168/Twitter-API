@@ -1,5 +1,5 @@
 import express from 'express'
-import { body, validationResult, ValidationChain } from 'express-validator'
+import { validationResult, ValidationChain } from 'express-validator'
 import { RunnableValidationChains } from 'express-validator/src/middlewares/schema'
 
 // can be reused by many routes
@@ -17,7 +17,6 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
       return next()
       //nếu không có lỗi thì chuyển sang regitsterController
     }
-
     res.status(400).json({ errors: errors.mapped() })
   }
 }

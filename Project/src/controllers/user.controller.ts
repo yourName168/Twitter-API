@@ -20,23 +20,19 @@ export const loginController = (req: Request, res: Response, next: NextFunction)
       .status(400)
   next()
 }
-export const regitsterController = async (
+export const regitsterController = (
   req: Request<ParamsDictionary, any, RegitsterRequestBody>,
   //RegitsterRequestBody dùng để gán kiểu cho body gửi lên từ request Regitster
   res: Response,
   next: NextFunction
 ) => {
-  try {
-    const result = await usersService.regitster(req.body)
-    // truyền vào hàm regitstẻ một object do hàm regitster nhận vào payload
-    // là object gồm email và password
-    return res.status(200).json({
-      message: 'regitster success!',
-      result
-    })
-  } catch (error) {
-    return res.status(200).json({
-      message: 'regitster FAIL!'
-    })
-  }
+  throw new Error('loi')
+  // câu lệnh giúp giả định lỗi để luồng chạy xuống khối catch
+  const result = usersService.regitster(req.body)
+  // truyền vào hàm regitster một object do hàm regitster nhận vào payload
+  // là object gồm email và password
+  return res.status(200).json({
+    message: 'regitster success!',
+    result
+  })
 }

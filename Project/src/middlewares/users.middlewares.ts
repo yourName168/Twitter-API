@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction, request } from 'express'
 import { checkSchema } from 'express-validator'
-import { ObjectId } from 'mongodb'
 import { databaseService } from '~/services/database.services'
 
 const checkEmail = databaseService.users

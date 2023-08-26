@@ -1,6 +1,7 @@
-import { Router, json } from 'express'
+import { Router } from 'express'
 import { loginController, regitsterController } from '~/controllers/user.controller'
 import { loginValidator, regitsterValidator } from '~/middlewares/users.middlewares'
+import { wrap } from '~/utils/handlers'
 import { validate } from '~/utils/validation'
 
 const usersRoute = Router()
@@ -14,6 +15,6 @@ usersRoute.post('/login', loginValidator, loginController)
  * ,confirm_password:string}
  */
 
-usersRoute.post('/regitster', validate(regitsterValidator), regitsterController)
+usersRoute.post('/regitster', validate(regitsterValidator), wrap(regitsterController))
 
 export default usersRoute
