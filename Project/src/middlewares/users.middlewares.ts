@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction, request } from 'express'
 import { checkSchema } from 'express-validator'
+import { ErrorWithStatus } from '~/models/Errors'
 import { databaseService } from '~/services/database.services'
 
 const checkEmail = databaseService.users
@@ -36,8 +37,9 @@ export const regitsterValidator = checkSchema({
       options: async (value) => {
         const existingEmail = await checkEmail.findOne({ email: value })
         if (existingEmail !== null) {
-          throw new Error('the email is exist')
+          throw new Error('email already exist')
         }
+        return true
       }
     }
   },
