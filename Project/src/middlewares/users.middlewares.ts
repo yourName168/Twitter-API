@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction, request } from 'express'
 import { checkSchema } from 'express-validator'
+import { USERS_MESSAGE } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
 import { databaseService } from '~/services/database.services'
 
@@ -19,55 +20,67 @@ export const loginValidator = (req: Request, res: Response, next: NextFunction) 
 }
 export const regitsterValidator = checkSchema({
   name: {
-    notEmpty: true,
-    isString: true,
+    notEmpty: {
+      errorMessage: USERS_MESSAGE.NAME_IS_REQUIRED
+    },
+    isString: {
+      errorMessage: USERS_MESSAGE.NAME_MUST_BE_A_STRING
+    },
     isLength: {
       options: {
         min: 1,
         max: 50
-      }
+      },
+      errorMessage: USERS_MESSAGE.NAME_LENGTH_MUST_BE_FROM_1_TO_50
     },
     trim: true
   },
   email: {
-    notEmpty: true,
-    isEmail: true,
+    notEmpty: {
+      errorMessage: USERS_MESSAGE.EMAIL_IS_REQUIRED
+    },
+    isEmail: {
+      errorMessage: USERS_MESSAGE.EMAIL_IS_INVALID
+    },
     trim: true,
     custom: {
       options: async (value) => {
         const existingEmail = await checkEmail.findOne({ email: value })
         if (existingEmail !== null) {
-          throw new Error('email already exist')
+          throw new Error(USERS_MESSAGE.EMAIL_ALREADY_EXIST)
         }
         return true
       }
     }
   },
   password: {
-    isString: true,
-    notEmpty: true,
-    isStrongPassword: true
+    notEmpty: {
+      errorMessage: USERS_MESSAGE.PASSWORD_IS_REQUIRED
+    },
+    isStrongPassword: {
+      errorMessage: USERS_MESSAGE.PASSWORD_MUST_BE_STRONG
+    }
   },
   confirm_password: {
-    isString: true,
-    notEmpty: true,
-    isStrongPassword: true,
+    notEmpty: {
+      errorMessage: USERS_MESSAGE.COMFIRM_PASSWORD_IS_REQUIRED
+    },
     custom: {
       options: (value, { req }) => {
         if (value !== req.body.password) {
-          throw new Error('Password confirmation does not match')
+          throw new Error(USERS_MESSAGE.CONFIRM_PASSWORD_MUST_BE_SAME_PASSWORD)
         }
         return true
       }
     }
   },
   date_of_birth: {
-    notEmpty: true,
     isISO8601: {
       options: {
         strict: true,
         strictSeparator: true
-      }
+      },
+      errorMessage: USERS_MESSAGE.DATE_OF_BIRTH_MUST_BE_ISO8601
     }
   }
 })
