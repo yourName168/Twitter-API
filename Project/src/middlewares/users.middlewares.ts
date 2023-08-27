@@ -1,23 +1,44 @@
-import { Request, Response, NextFunction, request } from 'express'
 import { checkSchema } from 'express-validator'
 import { USERS_MESSAGE } from '~/constants/messages'
-import { ErrorWithStatus } from '~/models/Errors'
+import User from '~/models/schemas/User.schema'
 import { databaseService } from '~/services/database.services'
+import { hashPassword } from '~/utils/crypto'
 
-const checkEmail = databaseService.users
+const usersService = databaseService.users
 //Nếu như sử dụng req,res, next trong Router thì không cần khai báo kiểu dữ liệu
 // vì trong ngữ cảnh sử dụng Router Typescript tự động hiểu kiểu dữ liệu của của
 // còn trong trường hợp này ta tách ra một middleware không có router nên cần gán kiểu
 // dữ liệu cho req, res, next để chặt chẽ hơn
-export const loginValidator = (req: Request, res: Response, next: NextFunction) => {
-  const { email, password } = req.body
-  if (!email || !password) {
-    res.status(404).json({
-      message: 'missing email or password'
-    })
+export const loginValidator = checkSchema({
+  email: {
+    isEmail: {
+      errorMessage: USERS_MESSAGE.EMAIL_IS_INVALID
+    },
+    trim: true,
+    custom: {
+      options: async (value, { req }) => {
+        const user = await usersService.findOne({ email: value })
+        if (user === null) {
+          throw new Error(USERS_MESSAGE.USER_NOT_FOUND)
+        }
+        req.user = user
+        return true
+      }
+    }
+  },
+  password: {
+    custom: {
+      options: async (value, { req }) => {
+        const user = req.user
+        console.log(user)
+        if (hashPassword(value) !== user?.password) {
+          throw new Error(USERS_MESSAGE.USER_NOT_FOUND)
+        }
+        return true
+      }
+    }
   }
-  next()
-}
+})
 export const regitsterValidator = checkSchema({
   name: {
     notEmpty: {
@@ -45,7 +66,7 @@ export const regitsterValidator = checkSchema({
     trim: true,
     custom: {
       options: async (value) => {
-        const existingEmail = await checkEmail.findOne({ email: value })
+        const existingEmail = await usersService.findOne({ email: value })
         if (existingEmail !== null) {
           throw new Error(USERS_MESSAGE.EMAIL_ALREADY_EXIST)
         }

@@ -19,7 +19,7 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
     // giá trị lưu error object
     if (error.isEmpty()) {
       return next()
-      //nếu không có lỗi thì chuyển sang regitsterController
+      //nếu không có lỗi thì chuyển sang controller
     }
     const errorsObject = error.mapped()
     const entityErrors = new EntityError({
@@ -28,7 +28,6 @@ export const validate = (validation: RunnableValidationChains<ValidationChain>) 
     for (const key in errorsObject) {
       // lỗi không phải do validate
       const { msg } = errorsObject[key]
-      console.log(errorsObject)
 
       if (msg instanceof ErrorWithStatus && msg.status !== HTTP_STATUS.UNPROCESSABLE_ENITY) {
         // kiểm tra msg là một ErrorWithStatus

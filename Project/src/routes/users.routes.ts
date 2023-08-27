@@ -6,7 +6,7 @@ import { validate } from '~/utils/validation'
 
 const usersRoute = Router()
 
-usersRoute.post('/login', loginValidator, loginController)
+usersRoute.post('/login', validate(loginValidator), wrap(loginController))
 /**
  * Description. Regitster a new user
  * path: /regitster

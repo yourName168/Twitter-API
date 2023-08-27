@@ -1,9 +1,10 @@
 import User from '~/models/schemas/User.schema'
 import { databaseService } from './database.services'
-import { RegitsterRequestBody } from '~/models/requests/User.request'
+import { LoginRequestBody, RegitsterRequestBody } from '~/models/requests/User.request'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import { TokenType } from '~/constants/enum'
+import { USERS_MESSAGE } from '~/constants/messages'
 class UsersService {
   private async signAccessToken(user_id: string) {
     //tạo ra access token
@@ -30,6 +31,13 @@ class UsersService {
       }
     })
   }
+  private async signAccessAndRefreshToken(user_id: string) {
+    const [access_token, refresh_token] = await Promise.all([
+      this.signAccessToken(user_id as string),
+      this.signRefreshToken(user_id as string)
+    ])
+    return { access_token, refresh_token }
+  }
   async regitster(payload: RegitsterRequestBody) {
     // const result = await databaseService.users.insertOne(
     //   // do insertOne là một Promise nên để thao tác thêm dữ liệu vào DB được hoàn thành
@@ -51,13 +59,10 @@ class UsersService {
       })
     )
     const user_id = result.insertedId.toString()
-    const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken(user_id),
-      this.signRefreshToken(user_id)
-    ])
-
-    console.log('Insert result:', access_token)
-    return { access_token, refresh_token }
+    return this.signAccessAndRefreshToken(user_id)
+  }
+  async login(user_id: string) {
+    return this.signAccessAndRefreshToken(user_id)
   }
 }
 

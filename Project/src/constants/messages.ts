@@ -13,5 +13,6 @@ export const USERS_MESSAGE = {
     'Password must be from 6, contain at least 1 lowercase letter, 1 uppercase letter, 1 number, 1 symbol',
   COMFIRM_PASSWORD_IS_REQUIRED: 'confirmpassword is requied',
   CONFIRM_PASSWORD_MUST_BE_SAME_PASSWORD: 'Confirm password must be same password',
-  DATE_OF_BIRTH_MUST_BE_ISO8601: ' Date of birth must be 8601'
+  DATE_OF_BIRTH_MUST_BE_ISO8601: ' Date of birth must be 8601',
+  USER_NOT_FOUND: 'User not found'
 } as const
