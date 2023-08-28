@@ -26,18 +26,18 @@ export const loginValidator = checkSchema({
       }
     }
   },
-  password: {
-    custom: {
-      options: async (value, { req }) => {
-        const user = req.user
-        console.log(user)
-        if (hashPassword(value) !== user?.password) {
-          throw new Error(USERS_MESSAGE.USER_NOT_FOUND)
-        }
-        return true
-      }
-    }
-  }
+  // password: {
+  //   custom: {
+  //     options: async (value, { req }) => {
+  //       const user = req.user
+  //       console.log(user)
+  //       if (hashPassword(value) !== user?.password) {
+  //         throw new Error(USERS_MESSAGE.USER_NOT_FOUND)
+  //       }
+  //       return true
+  //     }
+  //   }
+  // }
 })
 export const regitsterValidator = checkSchema({
   name: {
