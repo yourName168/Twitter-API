@@ -5,6 +5,9 @@ import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import { TokenType } from '~/constants/enum'
 import { USERS_MESSAGE } from '~/constants/messages'
+import { result } from 'lodash'
+import RefreshTokens from '~/models/schemas/RefreshToken.Schema'
+import { ObjectId } from 'mongodb'
 class UsersService {
   private async signAccessToken(user_id: string) {
     //tạo ra access token
@@ -59,10 +62,17 @@ class UsersService {
       })
     )
     const user_id = result.insertedId.toString()
-    return this.signAccessAndRefreshToken(user_id)
+    const res = await this.signAccessAndRefreshToken(user_id)
+    databaseService.refreshToken.insertOne(new RefreshTokens({ user_id, token: res.refresh_token }))
+    return res
   }
-  async login(user_id: string) {
-    return this.signAccessAndRefreshToken(user_id)
+  async login(user: User) {
+    const user_id = user._id
+    const result = await this.signAccessAndRefreshToken(user_id.toString())
+    databaseService.refreshToken.insertOne(
+      new RefreshTokens({ user_id: user_id.toString(), token: result.refresh_token })
+    )
+    return result
   }
 }
 

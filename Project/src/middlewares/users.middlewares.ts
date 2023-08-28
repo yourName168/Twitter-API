@@ -17,27 +17,23 @@ export const loginValidator = checkSchema({
     trim: true,
     custom: {
       options: async (value, { req }) => {
-        const user = await usersService.findOne({ email: value })
+        const user = await usersService.findOne({ email: value, password: hashPassword(req.body.password) })
         if (user === null) {
-          throw new Error(USERS_MESSAGE.USER_NOT_FOUND)
+          throw new Error(USERS_MESSAGE.EMAIL_OR_PASSWORD_INCORECT)
         }
         req.user = user
         return true
       }
     }
   },
-  // password: {
-  //   custom: {
-  //     options: async (value, { req }) => {
-  //       const user = req.user
-  //       console.log(user)
-  //       if (hashPassword(value) !== user?.password) {
-  //         throw new Error(USERS_MESSAGE.USER_NOT_FOUND)
-  //       }
-  //       return true
-  //     }
-  //   }
-  // }
+  password: {
+    notEmpty: {
+      errorMessage: USERS_MESSAGE.PASSWORD_IS_REQUIRED
+    },
+    isStrongPassword: {
+      errorMessage: USERS_MESSAGE.PASSWORD_MUST_BE_STRONG
+    }
+  }
 })
 export const regitsterValidator = checkSchema({
   name: {

@@ -15,8 +15,7 @@ export const loginController = async (
   next: NextFunction
 ) => {
   const user: User = req.user as User
-  const { _id } = user
-  const result = await usersService.login(_id.toString())
+  const result = await usersService.login(user)
   return res.status(HTTP_STATUS.APPECTED).json({
     message: 'login success!',
     result

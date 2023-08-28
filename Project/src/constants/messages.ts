@@ -14,5 +14,5 @@ export const USERS_MESSAGE = {
   COMFIRM_PASSWORD_IS_REQUIRED: 'confirmpassword is requied',
   CONFIRM_PASSWORD_MUST_BE_SAME_PASSWORD: 'Confirm password must be same password',
   DATE_OF_BIRTH_MUST_BE_ISO8601: ' Date of birth must be 8601',
-  USER_NOT_FOUND: 'User not found'
+  EMAIL_OR_PASSWORD_INCORECT: 'Email or password incorrect'
 } as const
