@@ -8,6 +8,7 @@ import { USERS_MESSAGE } from '~/constants/messages'
 import { result } from 'lodash'
 import RefreshTokens from '~/models/schemas/RefreshToken.Schema'
 import { ObjectId } from 'mongodb'
+import { json } from 'express'
 class UsersService {
   private async signAccessToken(user_id: string) {
     //tạo ra access token
@@ -17,7 +18,7 @@ class UsersService {
         type: TokenType.AccessToken
       },
       options: {
-        expiresIn: '5m'
+        expiresIn: '15m'
         // đặt thời gian hết hạn
       }
     })
@@ -73,6 +74,12 @@ class UsersService {
       new RefreshTokens({ user_id: user_id.toString(), token: result.refresh_token })
     )
     return result
+  }
+  async logout(refresh_token_id: string) {
+    databaseService.refreshToken.deleteOne({ token: refresh_token_id })
+    return {
+      message: USERS_MESSAGE.LOGOUT_SUCCESS
+    }
   }
 }
 

@@ -14,5 +14,13 @@ export const USERS_MESSAGE = {
   COMFIRM_PASSWORD_IS_REQUIRED: 'confirmpassword is requied',
   CONFIRM_PASSWORD_MUST_BE_SAME_PASSWORD: 'Confirm password must be same password',
   DATE_OF_BIRTH_MUST_BE_ISO8601: ' Date of birth must be 8601',
-  EMAIL_OR_PASSWORD_INCORECT: 'Email or password incorrect'
+  EMAIL_OR_PASSWORD_INCORECT: 'Email or password incorrect',
+  REFRESH_TOKEN_IS_REQUIRED: 'Refresh Token is required',
+  ACCESS_TOKEN_IS_REQUIRED: 'Access Token is required',
+  ACCESS_TOKEN_IS_INVALID: 'Access Token is invalid',
+  REFRESH_TOKEN_IS_INVALID: 'Refresh Token is invalid',
+  REFRESH_TOKEN_IS_NOT_EXIST: 'Refresh Token is not exist',
+  LOGIN_SUCCESS: 'Login successfully!',
+  REGITSTER_SUCCESS: 'Regitster successfully!',
+  LOGOUT_SUCCESS: 'Logout successfully!'
 } as const

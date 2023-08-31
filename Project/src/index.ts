@@ -6,6 +6,7 @@ import { defaultErrorHandler } from './middlewares/error.middlewares'
 import usersService from './services/users.services'
 const app = express()
 const port = 3000
+databaseService.connect()
 app.listen(port, () => {
   console.log(`The server is running on port ${port}`)
 })
@@ -16,6 +17,5 @@ app.use('/user', usersRouter)
 
 app.use(defaultErrorHandler)
 // error handler cho cả app
-databaseService.connect()
 //khi gọi tới run() thì hàm sẽ trả về một promise và sẽ chạy các khối
 // có trong hàm run

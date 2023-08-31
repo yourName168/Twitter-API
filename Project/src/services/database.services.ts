@@ -2,12 +2,12 @@ import { Collection, Db, MongoClient } from 'mongodb'
 import dotenv from 'dotenv'
 import User from '~/models/schemas/User.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.Schema'
+dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 const password = process.env.DB_PASSWORD
 const username = process.env.DB_USERNAME
 const dbName = process.env.DB_NAME
 const userCollection = process.env.DB_USERCOLLECTION
 const refreshTokenCollection = process.env.DB_REFRESHTOKENCOLLECTION
-dotenv.config()//file nào sử dụng process.env thì phải sử dụng hàm config()
 
 const uri = `mongodb+srv://${username}:${password}@twitter.76xkcay.mongodb.net/?retryWrites=true&w=majority`
 
@@ -22,7 +22,6 @@ class DatabaseService {
   }
   async connect() {
     try {
-      //chọn cơ sở dữ liệu có tên admin để tương tác
       // Connect the this.client to the server	(optional starting in v4.7)
       await this.client.connect()
       // Send a ping to confirm a successful connection

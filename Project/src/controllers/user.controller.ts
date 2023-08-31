@@ -4,16 +4,13 @@ import { ParamsDictionary } from 'express-serve-static-core'
 import { RegitsterRequestBody } from '~/models/requests/User.request'
 import HTTP_STATUS from '~/constants/httpStatus'
 import User from '~/models/schemas/User.schema'
+import { databaseService } from '~/services/database.services'
+import { USERS_MESSAGE } from '~/constants/messages'
 //Nếu như sử dụng req,res, next trong Router thì không cần khai báo kiểu dữ liệu
 // vì trong ngữ cảnh sử dụng Router Typescript tự động hiểu kiểu dữ liệu của của
 // còn trong trường hợp này ta tách ra một middleware không có router nên cần gán kiểu
 // dữ liệu cho req, res, next để chặt chẽ hơn
-export const loginController = async (
-  req: Request,
-  //RegitsterRequestBody dùng để gán kiểu cho body gửi lên từ request Regitster
-  res: Response,
-  next: NextFunction
-) => {
+export const loginController = async (req: Request, res: Response, next: NextFunction) => {
   const user: User = req.user as User
   const result = await usersService.login(user)
   return res.status(HTTP_STATUS.APPECTED).json({
@@ -35,4 +32,9 @@ export const regitsterController = async (
     message: 'regitster success!',
     result
   })
+}
+export const logoutController = async (req: Request, res: Response, next: NextFunction) => {
+  const { refresh_token } = req.body
+  const result = await usersService.logout(refresh_token)
+  return res.json(result)
 }
