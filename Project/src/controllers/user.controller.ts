@@ -6,6 +6,7 @@ import HTTP_STATUS from '~/constants/httpStatus'
 import User from '~/models/schemas/User.schema'
 import { databaseService } from '~/services/database.services'
 import { USERS_MESSAGE } from '~/constants/messages'
+import { ObjectId } from 'mongodb'
 //Nếu như sử dụng req,res, next trong Router thì không cần khai báo kiểu dữ liệu
 // vì trong ngữ cảnh sử dụng Router Typescript tự động hiểu kiểu dữ liệu của của
 // còn trong trường hợp này ta tách ra một middleware không có router nên cần gán kiểu
@@ -36,5 +37,11 @@ export const regitsterController = async (
 export const logoutController = async (req: Request, res: Response, next: NextFunction) => {
   const { refresh_token } = req.body
   const result = await usersService.logout(refresh_token)
+  return res.json(result)
+}
+export const verifyEmailController = async (req: Request, res: Response, next: NextFunction) => {
+  const decoded_email_verify_token = req.decoded_email_verify_token
+  const { user_id } = decoded_email_verify_token
+  const result = await usersService.verifyEmail(user_id)
   return res.json(result)
 }

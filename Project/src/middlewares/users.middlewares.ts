@@ -7,9 +7,12 @@ import RefreshTokens from '~/models/schemas/RefreshToken.Schema'
 import { databaseService } from '~/services/database.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
-
+import dotenv from 'dotenv'
+dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
+const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
+const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
+const emailVerifyTokenSecret = process.env.EMAIL_VERIFY_TOKEN_SECRET as string
 const usersService = databaseService.users
-const refreshTokenService = databaseService.refreshToken
 //Nếu như sử dụng req,res, next trong Router thì không cần khai báo kiểu dữ liệu
 // vì trong ngữ cảnh sử dụng Router Typescript tự động hiểu kiểu dữ liệu của của
 // còn trong trường hợp này ta tách ra một middleware không có router nên cần gán kiểu
@@ -130,7 +133,7 @@ export const accessTokenValidator = checkSchema(
               status: HTTP_STATUS.UNAUTHORIED
             })
           }
-          const decoded_authorizarion = await verifyToken({ token: access_token })
+          const decoded_authorizarion = await verifyToken({ token: access_token, secretOrPublickey: accessTokenSecret })
           if (decoded_authorizarion === null) {
             throw new Error(USERS_MESSAGE.ACCESS_TOKEN_IS_INVALID)
           }
@@ -150,13 +153,12 @@ export const refreshTokenValidator = checkSchema(
       },
       custom: {
         options: async (value, { req }) => {
-          const refreshToken = null
           try {
-            const [decoded_refresh_token, refreshTOken] = await Promise.all([
-              verifyToken({ token: value }),
-              databaseService.refreshToken.findOne({ token: value })
+            const [refreshToken] = await Promise.all([
+              databaseService.refreshToken.findOne({ token: value }),
+              verifyToken({ token: value, secretOrPublickey: refreshTokenSecret })
             ])
-            if (refreshTOken === null) {
+            if (refreshToken === null) {
               throw new Error(USERS_MESSAGE.REFRESH_TOKEN_IS_NOT_EXIST)
             }
           } catch (error) {
@@ -169,6 +171,40 @@ export const refreshTokenValidator = checkSchema(
             throw error
           }
 
+          return true
+        }
+      }
+    }
+  },
+  ['body']
+)
+
+export const emailVerifyTokenValidator = checkSchema(
+  {
+    email_verify_token: {
+      notEmpty: {
+        errorMessage: USERS_MESSAGE.EMAIL_VERIFY_TOKEN_IS_INVALID
+      },
+      custom: {
+        options: async (value, { req }) => {
+          try {
+            const [decoded_email_verify_token, email_verify_token] = await Promise.all([
+              verifyToken({ token: value, secretOrPublickey: emailVerifyTokenSecret }),
+              databaseService.users.findOne({ email_verify_token: value })
+            ])
+            if (email_verify_token === null) {
+              throw new Error(USERS_MESSAGE.EMAIL_VERIFY_TOKEN_DOES_NOT_EXIST)
+            }
+            req.decoded_email_verify_token = decoded_email_verify_token
+          } catch (error) {
+            if (error instanceof JsonWebTokenError) {
+              throw new ErrorWithStatus({
+                message: USERS_MESSAGE.EMAIL_VERIFY_TOKEN_IS_INVALID,
+                status: HTTP_STATUS.UNAUTHORIED
+              })
+            }
+            throw error
+          }
           return true
         }
       }

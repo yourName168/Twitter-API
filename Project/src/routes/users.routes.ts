@@ -1,7 +1,13 @@
 import { Router } from 'express'
-import { loginController, logoutController, regitsterController } from '~/controllers/user.controller'
+import {
+  loginController,
+  logoutController,
+  regitsterController,
+  verifyEmailController
+} from '~/controllers/user.controller'
 import {
   accessTokenValidator,
+  emailVerifyTokenValidator,
   loginValidator,
   refreshTokenValidator,
   regitsterValidator
@@ -35,5 +41,12 @@ usersRoute.post('/regitster', validate(regitsterValidator), wrap(regitsterContro
  */
 
 usersRoute.post('/logout', validate(accessTokenValidator), validate(refreshTokenValidator), wrap(logoutController))
+/**
+ * Description. verify user
+ * path: /verify
+ * mothod: POST
+ * Body:{email_verify_token:string}
+ */
 
+usersRoute.post('/verify-email', validate(emailVerifyTokenValidator), wrap(verifyEmailController))
 export default usersRoute

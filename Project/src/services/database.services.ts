@@ -1,8 +1,8 @@
 import { Collection, Db, MongoClient } from 'mongodb'
 import dotenv from 'dotenv'
+dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 import User from '~/models/schemas/User.schema'
 import RefreshToken from '~/models/schemas/RefreshToken.Schema'
-dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 const password = process.env.DB_PASSWORD
 const username = process.env.DB_USERNAME
 const dbName = process.env.DB_NAME

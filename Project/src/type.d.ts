@@ -6,6 +6,6 @@ declare module 'express' {
   interface Request {
     user?: User
     decoded_authorizarion?: JwtPayload
-    refresh_token?: ObjectId
+    decoded_email_verify_token?: any
   }
 }
