@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import usersService from '~/services/users.services'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { RegitsterRequestBody } from '~/models/requests/User.request'
+import { RegitsterRequestBody, resetPasswordRequestBody } from '~/models/requests/User.request'
 import HTTP_STATUS from '~/constants/httpStatus'
 import User from '~/models/schemas/User.schema'
 import { databaseService } from '~/services/database.services'
@@ -43,5 +43,21 @@ export const verifyEmailController = async (req: Request, res: Response, next: N
   const decoded_email_verify_token = req.decoded_email_verify_token
   const { user_id } = decoded_email_verify_token
   const result = await usersService.verifyEmail(user_id)
+  return res.json(result)
+}
+export const forgotPasswordController = async (req: Request, res: Response, next: NextFunction) => {
+  const user = req.user
+  const { _id } = user as User
+  const result = await usersService.forgotPassword(_id.toString())
+  return res.json(result)
+}
+export const resetPasswordController = async (
+  req: Request<ParamsDictionary, any, resetPasswordRequestBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  const user = req.user
+  const { _id } = user as User
+  const result = await usersService.resetPassword(req.body, _id.toString())
   return res.json(result)
 }

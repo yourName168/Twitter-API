@@ -12,11 +12,13 @@ dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
 const emailVerifyTokenSecret = process.env.EMAIL_VERIFY_TOKEN_SECRET as string
+const forgotPasswordSecret = process.env.FORGOT_PASSWORD_TOKEN_SECRET as string
 const usersService = databaseService.users
 //Nếu như sử dụng req,res, next trong Router thì không cần khai báo kiểu dữ liệu
 // vì trong ngữ cảnh sử dụng Router Typescript tự động hiểu kiểu dữ liệu của của
 // còn trong trường hợp này ta tách ra một middleware không có router nên cần gán kiểu
 // dữ liệu cho req, res, next để chặt chẽ hơn
+
 export const loginValidator = checkSchema(
   {
     email: {
@@ -212,4 +214,82 @@ export const emailVerifyTokenValidator = checkSchema(
   },
   ['body']
 )
+export const emailValidator = checkSchema(
+  {
+    email: {
+      trim: true,
+      custom: {
+        options: async (value, { req }) => {
+          const user = await usersService.findOne({ email: value })
+          if (user === null) {
+            throw new Error(USERS_MESSAGE.EMAIL_OR_PASSWORD_INCORECT)
+          }
+          req.user = user
+          return true
+        }
+      }
+    }
+  },
+  ['body']
+)
+export const forgotPasswordTokenValidator = checkSchema({
+  forgot_password_token: {
+    trim: true,
+    custom: {
+      options: async (value, { req }) => {
+        try {
+          const decoded_forgot_password_token = await verifyToken({
+            token: value,
+            secretOrPublickey: forgotPasswordSecret as string
+          })
+          const { _id } = decoded_forgot_password_token
+        } catch (error) {
+          throw new ErrorWithStatus({
+            message: USERS_MESSAGE.FORGOT_PASSWORD_TOKEN_IS_INVALID,
+            status: HTTP_STATUS.UNAUTHORIED
+          })
+        }
+      }
+    }
+  }
+})
+export const resetPasswordValidator = checkSchema({
+  password: {
+    notEmpty: {
+      errorMessage: USERS_MESSAGE.PASSWORD_IS_REQUIRED
+    },
+    isStrongPassword: {
+      errorMessage: USERS_MESSAGE.PASSWORD_MUST_BE_STRONG
+    }
+  },
+  confirm_password: {
+    notEmpty: {
+      errorMessage: USERS_MESSAGE.COMFIRM_PASSWORD_IS_REQUIRED
+    },
+    custom: {
+      options: (value, { req }) => {
+        if (value !== req.body.password) {
+          throw new Error(USERS_MESSAGE.CONFIRM_PASSWORD_MUST_BE_SAME_PASSWORD)
+        }
+        return true
+      }
+    }
+  },
+  Authorization: {
+    custom: {
+      options: async (values, { req }) => {
+        const forgot_password_token = values.split(' ')[1]
+        const user = await databaseService.users.findOne({ forgot_password_token })
+        if (user === null) {
+          throw new ErrorWithStatus({
+            message: USERS_MESSAGE.FORGOT_PASSWORD_TOKEN_IS_INVALID,
+            status: HTTP_STATUS.UNAUTHORIED
+          })
+        }
+        req.user = user
+        return true
+      }
+    }
+  }
+})
 // kiểm tra xem schema truyền vào có phù hợp hay không

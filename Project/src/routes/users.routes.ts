@@ -1,16 +1,21 @@
 import { Router } from 'express'
 import {
+  forgotPasswordController,
   loginController,
   logoutController,
   regitsterController,
+  resetPasswordController,
   verifyEmailController
 } from '~/controllers/user.controller'
 import {
   accessTokenValidator,
+  emailValidator,
   emailVerifyTokenValidator,
+  forgotPasswordTokenValidator,
   loginValidator,
   refreshTokenValidator,
-  regitsterValidator
+  regitsterValidator,
+  resetPasswordValidator
 } from '~/middlewares/users.middlewares'
 import { wrap } from '~/utils/handlers'
 import { validate } from '~/utils/validation'
@@ -49,4 +54,34 @@ usersRoute.post('/logout', validate(accessTokenValidator), validate(refreshToken
  */
 
 usersRoute.post('/verify-email', validate(emailVerifyTokenValidator), wrap(verifyEmailController))
+/**
+ * Description. forgot password
+ * path: /forgot-password
+ * mothod: POST
+ * Body:{email:string}
+ */
+
+usersRoute.post('/forgot-password', validate(emailValidator), wrap(forgotPasswordController))
+
+/**
+ * Description. validate forgot password token
+ * path: /validate-forgot-password-token
+ * mothod: POST
+ * Body:{forgot_password_token:JWT}
+ */
+
+usersRoute.post('/validate-forgot-password-token', validate(forgotPasswordTokenValidator), (req, res, next) => {
+  res.status(200).json({
+    message: 'forgot password token is valid'
+  })
+})
+/**
+ * Description. reset password
+ * path: /reset-password
+ * mothod: POST
+ * Body:{email:string}
+ */
+
+usersRoute.post('/reset-password', validate(resetPasswordValidator), wrap(resetPasswordController))
+
 export default usersRoute

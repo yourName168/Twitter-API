@@ -9,3 +9,8 @@ export interface LoginRequestBody {
   email: string
   password: string
 }
+export interface resetPasswordRequestBody {
+  password: string
+  Authenrization: string
+  confirm_password: string
+}

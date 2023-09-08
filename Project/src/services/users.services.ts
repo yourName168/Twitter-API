@@ -1,6 +1,6 @@
 import User from '~/models/schemas/User.schema'
 import { databaseService } from './database.services'
-import { RegitsterRequestBody } from '~/models/requests/User.request'
+import { RegitsterRequestBody, resetPasswordRequestBody } from '~/models/requests/User.request'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
 import { TokenType } from '~/constants/enum'
@@ -12,7 +12,20 @@ dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
 const emailVerifyTokenSecret = process.env.EMAIL_VERIFY_TOKEN_SECRET as string
+const forgotPasswordSecret = process.env.FORGOT_PASSWORD_TOKEN_SECRET as string
 class UsersService {
+  private async signForgotPasswordToken(user_id: string) {
+    return await signToken({
+      payload: {
+        user_id,
+        type: TokenType.ForgotPasswordToken
+      },
+      privateKey: forgotPasswordSecret,
+      options: {
+        expiresIn: '100d'
+      }
+    })
+  }
   private async signEmailVerifyToken(user_id: string) {
     return await signToken({
       payload: {
@@ -86,7 +99,9 @@ class UsersService {
         // chuyển kiểu nhập vào từ string sang lưu ở db là Date
       })
     )
+    // send email verify
     console.log(emailVerifyTOken)
+    // thêm RefreshToken vào trong database
     databaseService.refreshToken.insertOne(new RefreshTokens({ user_id: _id.toString(), token: res.refresh_token }))
 
     return res
@@ -106,18 +121,50 @@ class UsersService {
     }
   }
   async verifyEmail(user_id: string) {
-    databaseService.users.updateOne(
+    await databaseService.users.updateOne(
       { _id: new ObjectId(user_id) },
       {
         $set: {
           email_verify_token: '',
           verify: 1,
-          updated_at: new Date() 
+          updated_at: new Date()
         }
       }
     )
     return {
       message: USERS_MESSAGE.VERIFY_EMAIL_SUCCESS
+    }
+  }
+  async forgotPassword(_id: string) {
+    const forgot_password_token = await this.signForgotPasswordToken(_id)
+    // send email forgot password
+    console.log(forgot_password_token)
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(_id) },
+      {
+        $set: {
+          forgot_password_token,
+          updated_at: new Date()
+        }
+      }
+    )
+    return {
+      message: USERS_MESSAGE.FORGOT_PASSWORD_SUCCESS
+    }
+  }
+  async resetPassword(payload: resetPasswordRequestBody, _id: string) {
+    await databaseService.users.updateOne(
+      { _id: new ObjectId(_id) },
+      {
+        $set: {
+          forgot_password_token: '',
+          password: hashPassword(payload.password),
+          updated_at: new Date()
+        }
+      }
+    )
+    return {
+      message: USERS_MESSAGE.RESET_PASSWORD_SUCCESS
     }
   }
 }

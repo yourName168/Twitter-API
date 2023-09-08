@@ -25,5 +25,8 @@ export const USERS_MESSAGE = {
   LOGOUT_SUCCESS: 'Logout successfully!',
   EMAIL_VERIFY_TOKEN_IS_INVALID: 'Email verify token is invalid',
   EMAIL_VERIFY_TOKEN_DOES_NOT_EXIST: 'Email verify token doesn not exist',
-  VERIFY_EMAIL_SUCCESS: 'Email Verified'
+  VERIFY_EMAIL_SUCCESS: 'Email Verified',
+  FORGOT_PASSWORD_SUCCESS: 'please check your email',
+  FORGOT_PASSWORD_TOKEN_IS_INVALID: 'Forgot password Token is invalid',
+  RESET_PASSWORD_SUCCESS: 'Reset password success'
 } as const
