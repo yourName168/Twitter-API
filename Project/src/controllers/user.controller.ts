@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import usersService from '~/services/users.services'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { RegitsterRequestBody, resetPasswordRequestBody } from '~/models/requests/User.request'
+import { RegitsterRequestBody, TokenPayload, resetPasswordRequestBody } from '~/models/requests/User.request'
 import HTTP_STATUS from '~/constants/httpStatus'
 import User from '~/models/schemas/User.schema'
 import { databaseService } from '~/services/database.services'
@@ -60,4 +60,12 @@ export const resetPasswordController = async (
   const { _id } = user as User
   const result = await usersService.resetPassword(req.body, _id.toString())
   return res.json(result)
+}
+export const getMeController = async (req: Request, res: Response, next: NextFunction) => {
+  const { user_id } = req.decoded_authorizarion as TokenPayload
+  const result = await usersService.getMe(user_id)
+  return res.status(HTTP_STATUS.OK).json({
+    message: USERS_MESSAGE.GET_ME_SUCCESS,
+    result
+  })
 }

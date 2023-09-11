@@ -8,6 +8,7 @@ import { databaseService } from '~/services/database.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import dotenv from 'dotenv'
+import { TokenPayload } from '~/models/requests/User.request'
 dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
@@ -242,7 +243,7 @@ export const forgotPasswordTokenValidator = checkSchema({
             token: value,
             secretOrPublickey: forgotPasswordSecret as string
           })
-          const { _id } = decoded_forgot_password_token
+          const { user_id } = decoded_forgot_password_token as TokenPayload
         } catch (error) {
           throw new ErrorWithStatus({
             message: USERS_MESSAGE.FORGOT_PASSWORD_TOKEN_IS_INVALID,
