@@ -1,11 +1,10 @@
-import { JwtPayload } from 'jsonwebtoken'
 import User from './models/schemas/User.schema'
-import { ObjectId } from 'mongodb'
+import { TokenPayload } from './models/requests/User.request'
 
 declare module 'express' {
   interface Request {
     user?: User
-    decoded_authorizarion?: JwtPayload
-    decoded_email_verify_token?: any
+    decoded_authorizarion?: TokenPayload
+    decoded_email_verify_token?: TokenPayload
   }
 }

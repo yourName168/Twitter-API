@@ -3,12 +3,13 @@ import { JsonWebTokenError } from 'jsonwebtoken'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { USERS_MESSAGE } from '~/constants/messages'
 import { ErrorWithStatus } from '~/models/Errors'
-import RefreshTokens from '~/models/schemas/RefreshToken.Schema'
 import { databaseService } from '~/services/database.services'
 import { hashPassword } from '~/utils/crypto'
 import { verifyToken } from '~/utils/jwt'
 import dotenv from 'dotenv'
 import { TokenPayload } from '~/models/requests/User.request'
+import { NextFunction, Request, Response } from 'express'
+import { UserVerifyStatus } from '~/constants/enum'
 dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
@@ -293,4 +294,53 @@ export const resetPasswordValidator = checkSchema({
     }
   }
 })
+export const verifiedValidator = async (req: Request, res: Response, next: NextFunction) => {
+  const decoded_authorizarion = req.decoded_authorizarion
+  const { verify } = decoded_authorizarion as TokenPayload
+  // if (verify === UserVerifyStatus.verified) {
+  //   console.log('Asfa')
+  //   next()
+  // } else {
+  //   next('tai khoan chua xac thuc')
+  // }
+  next()
+}
+export const upDateProfileValidator = checkSchema(
+  {
+    name: {
+      isString: true,
+      isLength: {
+        options: {
+          min: 1,
+          max: 50
+        }
+      },
+      trim: true,
+      optional: true
+    },
+    userName: {
+      isLength: {
+        options: {
+          min: 5,
+          max: 50
+        }
+      },
+      trim: true,
+      optional: true
+    },
+    date_of_birth: {
+      notEmpty: true,
+      isISO8601: {
+        options: {
+          strict: true,
+          strictSeparator: true
+        },
+        errorMessage: USERS_MESSAGE.DATE_OF_BIRTH_MUST_BE_ISO8601
+      },
+      trim: true,
+      optional: true
+    }
+  },
+  ['body']
+)
 // kiểm tra xem schema truyền vào có phù hợp hay không

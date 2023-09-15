@@ -6,6 +6,7 @@ import {
   logoutController,
   regitsterController,
   resetPasswordController,
+  updateProfileController,
   verifyEmailController
 } from '~/controllers/user.controller'
 import {
@@ -16,7 +17,9 @@ import {
   loginValidator,
   refreshTokenValidator,
   regitsterValidator,
-  resetPasswordValidator
+  resetPasswordValidator,
+  upDateProfileValidator,
+  verifiedValidator
 } from '~/middlewares/users.middlewares'
 import { wrap } from '~/utils/handlers'
 import { validate } from '~/utils/validation'
@@ -93,5 +96,28 @@ usersRoute.post('/reset-password', validate(resetPasswordValidator), wrap(resetP
  */
 
 usersRoute.get('/me', validate(accessTokenValidator), wrap(getMeController))
+/**
+ * Description. update my profile
+ * path: /me
+ * mothod: PATCH: được sử dụng để update một resouces sẵn và chỉ thay đổi những field được yêu cầu
+ * Header:{Authorization:Bearer <access_token>}
+ * Body:UserSchema
+ */
+
+usersRoute.patch(
+  '/me',
+  validate(accessTokenValidator),
+  verifiedValidator,
+  validate(upDateProfileValidator),
+  wrap(updateProfileController)
+)
+/**
+ * Description. get user profile
+ * path: /:username
+ * mothod: GET
+ * Body:{username}
+ */
+
+usersRoute.get('/:username', validate(accessTokenValidator), wrap(getMeController))
 
 export default usersRoute

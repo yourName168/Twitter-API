@@ -1,24 +1,30 @@
 import User from '~/models/schemas/User.schema'
 import { databaseService } from './database.services'
-import { RegitsterRequestBody, resetPasswordRequestBody } from '~/models/requests/User.request'
+import {
+  RegitsterRequestBody,
+  resetPasswordRequestBody,
+  updateMyProfileRequestBody
+} from '~/models/requests/User.request'
 import { hashPassword } from '~/utils/crypto'
 import { signToken } from '~/utils/jwt'
-import { TokenType } from '~/constants/enum'
+import { TokenType, UserVerifyStatus } from '~/constants/enum'
 import { USERS_MESSAGE } from '~/constants/messages'
 import RefreshTokens from '~/models/schemas/RefreshToken.Schema'
 import dotenv from 'dotenv'
 import { ObjectId } from 'mongodb'
+import HTTP_STATUS from '~/constants/httpStatus'
 dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
 const emailVerifyTokenSecret = process.env.EMAIL_VERIFY_TOKEN_SECRET as string
 const forgotPasswordSecret = process.env.FORGOT_PASSWORD_TOKEN_SECRET as string
 class UsersService {
-  private async signForgotPasswordToken(user_id: string) {
+  private async signForgotPasswordToken(user_id: string, userStatus: UserVerifyStatus) {
     return await signToken({
       payload: {
         user_id,
-        type: TokenType.ForgotPasswordToken
+        verify: userStatus,
+        token_type: TokenType.ForgotPasswordToken
       },
       privateKey: forgotPasswordSecret,
       options: {
@@ -26,11 +32,12 @@ class UsersService {
       }
     })
   }
-  private async signEmailVerifyToken(user_id: string) {
+  private async signEmailVerifyToken(user_id: string, userStatus: UserVerifyStatus) {
     return await signToken({
       payload: {
         user_id,
-        type: TokenType.EmailVerifyToken
+        verify: UserVerifyStatus.Unverified,
+        token_type: TokenType.ForgotPasswordToken
       },
       privateKey: emailVerifyTokenSecret,
       options: {
@@ -38,12 +45,13 @@ class UsersService {
       }
     })
   }
-  private async signAccessToken(user_id: string) {
+  private async signAccessToken(user_id: string, userStatus: UserVerifyStatus) {
     //tạo ra access token
     return await signToken({
       payload: {
         user_id,
-        type: TokenType.AccessToken
+        verify: UserVerifyStatus.Unverified,
+        token_type: TokenType.ForgotPasswordToken
       },
       privateKey: accessTokenSecret,
       options: {
@@ -52,12 +60,13 @@ class UsersService {
       }
     })
   }
-  private async signRefreshToken(user_id: string) {
+  private async signRefreshToken(user_id: string, userStatus: UserVerifyStatus) {
     //tạo ra access token
     return await signToken({
       payload: {
         user_id,
-        type: TokenType.AccessToken
+        verify: UserVerifyStatus.verified,
+        token_type: TokenType.ForgotPasswordToken
       },
       privateKey: refreshTokenSecret,
       options: {
@@ -65,10 +74,10 @@ class UsersService {
       }
     })
   }
-  private async signAccessAndRefreshToken(user_id: string) {
+  private async signAccessAndRefreshToken(user_id: string, userStatus: UserVerifyStatus) {
     const [access_token, refresh_token] = await Promise.all([
-      this.signAccessToken(user_id as string),
-      this.signRefreshToken(user_id as string)
+      this.signAccessToken(user_id as string, userStatus),
+      this.signRefreshToken(user_id as string, userStatus)
     ])
     return { access_token, refresh_token }
   }
@@ -83,13 +92,14 @@ class UsersService {
     // )
     const _id = new ObjectId()
     const [emailVerifyTOken, res] = await Promise.all([
-      this.signEmailVerifyToken(_id.toString()),
-      this.signAccessAndRefreshToken(_id.toString())
+      this.signEmailVerifyToken(_id.toString(), 0),
+      this.signAccessAndRefreshToken(_id.toString(), 0)
     ])
     const result = await databaseService.users.insertOne(
       new User({
         ...payload,
         _id,
+        username: `user${_id.toString()}`,
         email_verify_token: emailVerifyTOken,
         //được sử dụng để truyền toàn bộ các thuộc tính của đối tượng payload
         //vào trong đối tượng User khi bạn tạo một đối tượng mới.
@@ -108,7 +118,8 @@ class UsersService {
   }
   async login(user: User) {
     const user_id = user._id
-    const result = await this.signAccessAndRefreshToken(user_id.toString())
+    const userStatus = user.verify
+    const result = await this.signAccessAndRefreshToken(user_id.toString(), userStatus)
     databaseService.refreshToken.insertOne(
       new RefreshTokens({ user_id: user_id.toString(), token: result.refresh_token })
     )
@@ -135,8 +146,9 @@ class UsersService {
       message: USERS_MESSAGE.VERIFY_EMAIL_SUCCESS
     }
   }
-  async forgotPassword(_id: string) {
-    const forgot_password_token = await this.signForgotPasswordToken(_id)
+  async forgotPassword(user: User) {
+    const { _id, verify } = user
+    const forgot_password_token = await this.signForgotPasswordToken(_id.toString(), verify)
     // send email forgot password
     console.log(forgot_password_token)
     await databaseService.users.updateOne(
@@ -174,11 +186,38 @@ class UsersService {
         projection: {
           password: 0,
           email_verify_token: 0,
-          forgot_password_token:0
+          forgot_password_token: 0
         }
       }
     )
     return user
+  }
+  async updateMyProfile(user_id: string, payload: updateMyProfileRequestBody) {
+    const { userName, date_of_birth } = payload
+    const DOB = new Date(date_of_birth)
+    const _payload = payload.date_of_birth ? { ...payload, date_of_birth: new Date(payload.date_of_birth) } : payload
+    const user = await databaseService.users.findOneAndUpdate(
+      {
+        _id: new ObjectId(user_id)
+      },
+      {
+        $set: {
+          ...(_payload as updateMyProfileRequestBody & { date_of_birth?: Date })
+        },
+        $currentDate: {
+          updated_at: true
+        }
+      },
+      {
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0
+        },
+        returnDocument: 'after'
+      }
+    )
+    return user.value
   }
 }
 

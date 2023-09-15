@@ -1,7 +1,12 @@
 import { Request, Response, NextFunction } from 'express'
 import usersService from '~/services/users.services'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { RegitsterRequestBody, TokenPayload, resetPasswordRequestBody } from '~/models/requests/User.request'
+import {
+  RegitsterRequestBody,
+  TokenPayload,
+  resetPasswordRequestBody,
+  updateMyProfileRequestBody
+} from '~/models/requests/User.request'
 import HTTP_STATUS from '~/constants/httpStatus'
 import User from '~/models/schemas/User.schema'
 import { databaseService } from '~/services/database.services'
@@ -41,14 +46,13 @@ export const logoutController = async (req: Request, res: Response, next: NextFu
 }
 export const verifyEmailController = async (req: Request, res: Response, next: NextFunction) => {
   const decoded_email_verify_token = req.decoded_email_verify_token
-  const { user_id } = decoded_email_verify_token
+  const { user_id } = decoded_email_verify_token as TokenPayload
   const result = await usersService.verifyEmail(user_id)
   return res.json(result)
 }
 export const forgotPasswordController = async (req: Request, res: Response, next: NextFunction) => {
   const user = req.user
-  const { _id } = user as User
-  const result = await usersService.forgotPassword(_id.toString())
+  const result = await usersService.forgotPassword(user as User)
   return res.json(result)
 }
 export const resetPasswordController = async (
@@ -66,6 +70,16 @@ export const getMeController = async (req: Request, res: Response, next: NextFun
   const result = await usersService.getMe(user_id)
   return res.status(HTTP_STATUS.OK).json({
     message: USERS_MESSAGE.GET_ME_SUCCESS,
+    result
+  })
+}
+export const updateProfileController = async (req: Request, res: Response, next: NextFunction) => {
+  const decoded_authorizarion = req.decoded_authorizarion
+  const payload = req.body as updateMyProfileRequestBody
+  const { user_id } = decoded_authorizarion as TokenPayload
+  const result = await usersService.updateMyProfile(user_id, payload)
+  return res.json({
+    message: USERS_MESSAGE.UPDATE_MYPROFILE_SUCCESS,
     result
   })
 }
