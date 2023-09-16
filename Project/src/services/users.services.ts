@@ -13,6 +13,7 @@ import RefreshTokens from '~/models/schemas/RefreshToken.Schema'
 import dotenv from 'dotenv'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
+import { ErrorWithStatus } from '~/models/Errors'
 dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
@@ -218,6 +219,26 @@ class UsersService {
       }
     )
     return user.value
+  }
+  async getProfile(username: string) {
+    const user = await databaseService.users.findOne(
+      { username },
+      {
+        projection: {
+          password: 0,
+          email_verify_token: 0,
+          forgot_password_token: 0,
+          verify: 0
+        }
+      }
+    )
+    if (user === null) {
+      throw new ErrorWithStatus({
+        message: USERS_MESSAGE.USER_NOT_FOUND,
+        status: HTTP_STATUS.NOT_FOUND
+      })
+    }
+    return user
   }
 }
 

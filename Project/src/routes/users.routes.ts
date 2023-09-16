@@ -2,6 +2,7 @@ import { Router } from 'express'
 import {
   forgotPasswordController,
   getMeController,
+  getProfileController,
   loginController,
   logoutController,
   regitsterController,
@@ -118,6 +119,6 @@ usersRoute.patch(
  * Body:{username}
  */
 
-usersRoute.get('/:username', validate(accessTokenValidator), wrap(getMeController))
+usersRoute.get('/:username', wrap(getProfileController))
 
 export default usersRoute

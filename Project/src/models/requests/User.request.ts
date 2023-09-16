@@ -23,7 +23,7 @@ export interface TokenPayload extends JwtPayload {
   verify: UserVerifyStatus
 }
 export interface updateMyProfileRequestBody {
-  name:string
+  name: string
   userName: string
   date_of_birth: string
 }

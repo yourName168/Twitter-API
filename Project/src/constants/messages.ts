@@ -31,5 +31,7 @@ export const USERS_MESSAGE = {
   RESET_PASSWORD_SUCCESS: 'Reset password success',
   GET_ME_SUCCESS: 'Get my profile success',
   ACCOUNT_DID_NOT_VERIFIED: "Your account didn't verified",
-  UPDATE_MYPROFILE_SUCCESS: 'Update my profile success'
+  UPDATE_MYPROFILE_SUCCESS: 'Update my profile success',
+  USER_NOT_FOUND: 'user not found',
+  GET_USER_PROFILE_SUCCESS: 'get user profile success'
 } as const
