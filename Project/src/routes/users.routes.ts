@@ -120,5 +120,14 @@ usersRoute.patch(
  */
 
 usersRoute.get('/:username', wrap(getProfileController))
+/**
+ * Description. follow some one
+ * path: /:username
+ * mothod: POST
+ * Header:{Authorization:Bearer <access_token>}
+ * Body:{followed_username:string}
+ */
+
+usersRoute.post('/:username', wrap(getProfileController))
 
 export default usersRoute
