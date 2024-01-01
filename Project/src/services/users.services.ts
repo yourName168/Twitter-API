@@ -14,11 +14,13 @@ import dotenv from 'dotenv'
 import { ObjectId } from 'mongodb'
 import HTTP_STATUS from '~/constants/httpStatus'
 import { ErrorWithStatus } from '~/models/Errors'
+import { sendValidateForgotPasswordToken, sendVerifyEmailTemplate } from '~/utils/email'
 dotenv.config() //file nào sử dụng process.env thì phải sử dụng hàm config()
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET as string
 const refreshTokenSecret = process.env.REFRESH_TOKEN_SECRET as string
 const emailVerifyTokenSecret = process.env.EMAIL_VERIFY_TOKEN_SECRET as string
 const forgotPasswordSecret = process.env.FORGOT_PASSWORD_TOKEN_SECRET as string
+const clientUrl = process.env.CLIENT_URL as string
 class UsersService {
   private async signForgotPasswordToken(user_id: string, userStatus: UserVerifyStatus) {
     return await signToken({
@@ -111,7 +113,7 @@ class UsersService {
       })
     )
     // send email verify
-    console.log(emailVerifyTOken)
+    await sendVerifyEmailTemplate(payload.email, emailVerifyTOken)
     // thêm RefreshToken vào trong database
     databaseService.refreshToken.insertOne(new RefreshTokens({ user_id: _id.toString(), token: res.refresh_token }))
 
@@ -144,14 +146,15 @@ class UsersService {
       }
     )
     return {
-      message: USERS_MESSAGE.VERIFY_EMAIL_SUCCESS
+      message: USERS_MESSAGE.VERIFY_EMAIL_SUCCESS,
+      status: HTTP_STATUS.OK
     }
   }
   async forgotPassword(user: User) {
     const { _id, verify } = user
     const forgot_password_token = await this.signForgotPasswordToken(_id.toString(), verify)
     // send email forgot password
-    console.log(forgot_password_token)
+    await sendValidateForgotPasswordToken(user.email, forgot_password_token)
     await databaseService.users.updateOne(
       { _id: new ObjectId(_id) },
       {
@@ -177,7 +180,8 @@ class UsersService {
       }
     )
     return {
-      message: USERS_MESSAGE.RESET_PASSWORD_SUCCESS
+      message: USERS_MESSAGE.RESET_PASSWORD_SUCCESS,
+      status: HTTP_STATUS.APPECTED
     }
   }
   async getMe(user_id: string) {

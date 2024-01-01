@@ -75,16 +75,14 @@ usersRoute.post('/forgot-password', validate(emailValidator), wrap(forgotPasswor
  * Body:{forgot_password_token:JWT}
  */
 
-usersRoute.post('/validate-forgot-password-token', validate(forgotPasswordTokenValidator), (req, res, next) => {
-  res.status(200).json({
-    message: 'forgot password token is valid'
-  })
+usersRoute.post('/validate-forgot-password-token', validate(forgotPasswordTokenValidator), (req, res) => {
+  res.json({ message: 'validate forgot password token success!' })
 })
 /**
  * Description. reset password
  * path: /reset-password
  * mothod: POST
- * Body:{email:string}
+ * Body:{password:string,confirm_password:string}
  */
 
 usersRoute.post('/reset-password', validate(resetPasswordValidator), wrap(resetPasswordController))
